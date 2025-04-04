@@ -1,4 +1,5 @@
-let a = 0, b = 0; // a is the accumulator when doing more than 1 operation
+let a = 0,
+  b = 0; // a is the accumulator when doing more than 1 operation
 let lastOperation = "";
 let lastClickIsOp = false;
 
@@ -24,9 +25,7 @@ const twoSideOperators = new Map([
 
 function myToString(num) {
   absoluteStr = Math.abs(num).toString();
-  if(num < 0)
-  {
-    console.log("negative !!!")
+  if (num < 0) {
     absoluteStr = absoluteStr + "-"; // because the negative sign appears on the other side otherwise
   }
 
@@ -51,85 +50,105 @@ function setScreenText(x) {
 }
 
 function getScreenText() {
-    let screenObj = document.getElementById("user-input-area");
-    return screenObj.value;
+  let screenObj = document.getElementById("user-input-area");
+  return screenObj.value;
 }
 
 function getScreenValue() {
-    console.log(parseInt(getScreenText()))
-    return parseInt(getScreenText());
+  console.log(parseFloat(getScreenText()));
+  const screenText = getScreenText();
+  let isNegative = screenText.substr(-1) === "-"; // last character because we put minus the opposite way for showing it correctly
+  // cause parseFloat or Int don't convert the minus in the end of the string
+  return parseFloat(getScreenText()) * (isNegative ? -1 : 1);
 }
 
 function allZeros(text) {
-  return text.split('').every(char => char === '0')
+  return text.split("").every((char) => char === "0");
 }
 
 function setBtnEvent(btn) {
-    btnType = btn.id;
-    if (btnType == "num-btn") {
-        btn.addEventListener("click", (event) => {
-            if(lastClickIsOp) {
-                setScreenText(""); // because if you clicked an op, it should only show the new clicked number
-            }
-            // will add empty for the first function if we apply the if before
-            let screenText = getScreenText();
-            setScreenText((allZeros(screenText) ? "" : screenText) + event.target.textContent);
-            lastClickIsOp = false;
-        });
-        return;
-    }
+  btnType = btn.id;
+  if (btnType == "num-btn") {
+    btn.addEventListener("click", (event) => {
+      if (lastClickIsOp) {
+        setScreenText(""); // because if you clicked an op, it should only show the new clicked number
+      }
+      // will add empty for the first function if we apply the if before
+      let screenText = getScreenText();
+      setScreenText(
+        (allZeros(screenText) ? "" : screenText) + event.target.textContent
+      );
+      lastClickIsOp = false;
+    });
+    return;
+  }
 
-    if(btn.innerText === "AC") {
-      btn.addEventListener("click", (event) => {
-        setScreenText("0"); // cause it will reset the value
-        a = b = 0;
-        lastOperation = "";
-    })
+  if (btn.innerText === "AC") {
+    btn.addEventListener("click", (event) => {
+      setScreenText("0"); // cause it will reset the value
+      a = b = 0;
+      lastOperation = "";
+    });
 
-      return;
-    }
+    return;
+  }
 
-    // if the button is one side operator
-    if(oneSideOperators.has(btn.innerText)) {
-      btn.addEventListener("click", (event) => {
-        // last operation will be nothing cause the user clicked on a single operator which will apply to what exists
-        lastOperation = ""
-        lastClickIsOp = false;
-        a = getScreenValue(); // get screen value
-        let opFun = oneSideOperators.get(btn.innerText); // apply the single operator
-        a = opFun(a);
-        setScreenText(myToString(a))
+  // if the btn is a dot
+  if (btn.innerText === ".") {
+    btn.addEventListener("click", (event) => {
+      let screenNumberStr = getScreenText();
+      if(screenNumberStr.substr(-1) === "-") {
+        // remove the minus, put a dot then return the minus
+        screenNumberStr = screenNumberStr.slice(0,-1) + '.' + '-';
+        console.log(`negative screen num now is ${screenNumberStr}`)
+      }
+      else {
+        screenNumberStr += '.';
+        console.log(`positive screen num now is ${screenNumberStr}`)
+      }
+
+      setScreenText(screenNumberStr);
     })
     return;
+  }
+
+  // if the button is one side operator
+  if (oneSideOperators.has(btn.innerText)) {
+    btn.addEventListener("click", (event) => {
+      // last operation will be nothing cause the user clicked on a single operator which will apply to what exists
+      lastOperation = "";
+      lastClickIsOp = false;
+      a = getScreenValue(); // get screen value
+      let opFun = oneSideOperators.get(btn.innerText); // apply the single operator
+      a = opFun(a);
+      setScreenText(myToString(a));
+    });
+    return;
+  }
+
+  btn.addEventListener("click", (event) => {
+    if (lastOperation === "=") {
+      lastOperation = ""; // so that it does nothing practically unless it had an operation before
     }
 
-    btn.addEventListener("click", (event) => {
-        if(lastOperation === "=")
-        {
-          lastOperation = ""; // so that it does nothing practically unless it had an operation before
-        }
-
-        if(lastOperation.length > 0) // not the first operation
-        {
-            console.log("not the first operation");
-            console.log(a);
-            b = getScreenValue();
-            let opFunc = twoSideOperators.get(lastOperation); // apply the last operation
-            // apply the operation on a, b and store the result in a
-            a = opFunc(a, b);
-            // print the result
-            setScreenText(myToString(a));
-        }
-        else 
-        {
-            console.log("the first operation");
-            a = getScreenValue();
-        }
-        lastClickIsOp = true;
-        lastOperation = event.target.textContent;
-    })
+    if (lastOperation.length > 0) {
+      // not the first operation
+      console.log("not the first operation");
+      console.log(a);
+      b = getScreenValue();
+      let opFunc = twoSideOperators.get(lastOperation); // apply the last operation
+      // apply the operation on a, b and store the result in a
+      a = opFunc(a, b);
+      // print the result
+      setScreenText(myToString(a));
+    } else {
+      console.log("the first operation");
+      a = getScreenValue();
+    }
+    lastClickIsOp = true;
+    lastOperation = event.target.textContent;
+  });
 }
-
 
 function createCalculatorView(calculatorArray) {
   let calculatorContainer = document.getElementById("calculator-container");
@@ -143,7 +162,7 @@ function createCalculatorView(calculatorArray) {
       let val = calculatorArray[i][j];
       btn.innerText = val;
       console.log(val + "\n");
-      let convertedVal = parseInt(val);
+      let convertedVal = parseFloat(val);
       btn.id = isNaN(convertedVal) ? "op-btn" : "num-btn";
       // TODO remove
       console.log(btn.id);
