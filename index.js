@@ -60,6 +60,10 @@ function getScreenValue() {
     return parseInt(getScreenText());
 }
 
+function allZeros(text) {
+  return text.split('').every(char => char === '0')
+}
+
 function setBtnEvent(btn) {
     btnType = btn.id;
     if (btnType == "num-btn") {
@@ -68,7 +72,8 @@ function setBtnEvent(btn) {
                 setScreenText(""); // because if you clicked an op, it should only show the new clicked number
             }
             // will add empty for the first function if we apply the if before
-            setScreenText(getScreenText() + event.target.textContent);
+            let screenText = getScreenText();
+            setScreenText((allZeros(screenText) ? "" : screenText) + event.target.textContent);
             lastClickIsOp = false;
         });
         return;
@@ -76,7 +81,7 @@ function setBtnEvent(btn) {
 
     if(btn.innerText === "AC") {
       btn.addEventListener("click", (event) => {
-        setScreenText("");
+        setScreenText("0"); // cause it will reset the value
         a = b = 0;
         lastOperation = "";
     })
